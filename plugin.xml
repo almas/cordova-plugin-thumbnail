@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+            id="com.cordova.plugin.thumbnail" version="0.1.0">
+    <name>Thumbnail</name>
+    <description>Cordova Thumbnail Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,thumbnail,Android,iOS</keywords>
+
+    <js-module src="www/thumbnail.js" name="Thumbnails">
+        <clobbers target="window.Thumbnails" />
+    </js-module>
+
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="Thumbnails">
+                <param name="android-package" value="com.cordova.plugin.thumbnail.ThumbnailsCordovaPlugin"/>
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+
+        <!-- <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        </config-file> -->
+
+        <source-file src="src/android/SourcePathNotFoundException.java" target-dir="src/com/cordova/plugin/thumbnail" />
+        <source-file src="src/android/TargetPathNotFoundException.java" target-dir="src/com/cordova/plugin/thumbnail" />
+        <source-file src="src/android/Thumbnails.java" target-dir="src/com/cordova/plugin/thumbnail" />
+        <source-file src="src/android/ThumbnailsCordovaPlugin.java" target-dir="src/com/cordova/plugin/thumbnail" />
+    </platform>
+
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="Thumbnails">
+                <param name="ios-package" value="ThumbnailCordovaPlugin"/>
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/Thumbnail.h" />
+        <source-file src="src/ios/Thumbnail.m" />
+
+        <framework src="MobileCoreServices.framework" />
+        <framework src="CoreGraphics.framework" />
+        <framework src="CoreImage.framework" />
+        <framework src="ImageIO.framework" />
+    </platform>
+</plugin>
