@@ -37,3 +37,11 @@ Thumbnails.thumbnail(sourcePath, options, function success(path) {
     console.error(error);
 });
 ```
+
+## Android specific configuration:
+
+You need to add the following configuration in the `config.xml` file:
+
+```
+<preference name="AndroidPersistentFileLocation" value="Internal" />
+```
