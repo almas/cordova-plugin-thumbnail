@@ -66,11 +66,11 @@ public class ThumbnailsCordovaPlugin extends CordovaPlugin {
                    callbackContext.success(options.targetPath);
                } catch (SourcePathNotFoundException e) {
                    e.printStackTrace();
-                   callbackContext.error("图片文件" + options.sourcePath + "不存在。");
+                   callbackContext.error("The image file does not exist at path: " + options.sourcePath);
                } catch (TargetPathNotFoundException e) {
-                   callbackContext.error("创建不了缩略图文件：" + options.targetPath + "。");
+                   callbackContext.error("Can't create thumbnail file at path: " + options.targetPath);
                } catch (Exception e) {
-                   callbackContext.error("未知错误：" + e.getMessage());
+                   callbackContext.error("Error: " + e.getMessage());
                }
            }
        });

@@ -3,7 +3,13 @@
 var Thumbnails = {},
     emptyFn = function() {};
 
-function optionsToThumbnailArgs(options) {
+function options2Args(options) {
+    if(!options.width) {
+        options.width = 120;
+    }
+    if(!options.height) {
+        options.height = 120;
+    }
     if (!options.targetPath) {
         return [options.srcPath, options.width, options.height];
     } else {
@@ -18,7 +24,7 @@ Thumbnails.config = function(persistenceOrTemp) {
     cordova.exec(emptyFn, emptyFn, "Thumbnails", "config", [persistenceOrTemp]);
 };
 
-Thumbnails.thumbnail = function(srcPath, width, height, options, successFn, failFn) {
+Thumbnails.thumbnail = function(srcPath, options, successFn, failFn) {
     if (typeof options === 'function') {
         failFn = successFn;
         successFn = options;
@@ -28,11 +34,9 @@ Thumbnails.thumbnail = function(srcPath, width, height, options, successFn, fail
     successFn = successFn || emptyFn;
     failFn = failFn || emptyFn;
 
-    options.width = width;
-    options.height = height;
     options.srcPath = srcPath;
 
-    cordova.exec(successFn, failFn, "Thumbnails", "thumbnail", optionsToThumbnailArgs(options));
+    cordova.exec(successFn, failFn, "Thumbnails", "thumbnail", options2Args(options));
 };
 
 window.Thumbnails = Thumbnails;

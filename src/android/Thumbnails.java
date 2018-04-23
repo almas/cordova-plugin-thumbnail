@@ -35,7 +35,7 @@ public class Thumbnails {
 
         saveBitmapToFile(bitmap, thumbnailOptions.targetPath);
 
-        Log.i("thumbnail", "产生[" + thumbnailOptions.sourcePath + "]缩略图共花费了" + (System.currentTimeMillis() - begin) + "ms");
+        Log.i("thumbnail", "Generated at [" + thumbnailOptions.sourcePath + "] in " + (System.currentTimeMillis() - begin) + "ms");
     }
 
     private static Bitmap thumbnailSamllImage(Bitmap bitmap, int width, int height) {
@@ -50,7 +50,7 @@ public class Thumbnails {
 
         bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height);
 
-        Log.i("thumbnailSallImage", "花费：" + (System.currentTimeMillis() - begin) + "ms");
+        Log.i("thumbnailSallImage", "Spent time: " + (System.currentTimeMillis() - begin) + "ms");
         return bitmap;
     }
 
@@ -101,14 +101,14 @@ public class Thumbnails {
         } catch (FileNotFoundException ex) {
             throw new TargetPathNotFoundException(ex);
         } catch (IOException ex) {
-            Log.e("Thumbnails.saveBitmapToFile()", "打开文件流出错：" + targetPath);
+            Log.e("Thumbnails.saveBitmapToFile()", "Error opening file stream:" + targetPath);
             ex.printStackTrace();
         } finally {
             if (os != null) {
                 try {
                     os.close();
                 } catch (IOException ex) {
-                    Log.e("Thumbnails.saveBitmapToFile()", "关闭文件流出错。");
+                    Log.e("Thumbnails.saveBitmapToFile()", "Error closing file stream.");
                     ex.printStackTrace();
                 }
             }
