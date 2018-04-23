@@ -18,7 +18,7 @@ cordova plugin add https://github.com/almas/cordova-plugin-thumbnail.git
 - `options` other configuration parameter objects
   - `width`: Width of thumbnail in pixels (default value: 120)
   - `height` Height of thumbnail in pixels (default value: 120)
-  - `targetPath` Thumbnail storage path, if not specified, will randomly create a file to store the generated thumbnail.
+  - `targetPath` Thumbnail path. If not specified, will randomly create a file to store the generated thumbnail.
 - `successCallbackFn` Thumbnail generates a successful callback function
 - `failCallbackFn` Thumbnail Generation Failed Callback Function
 
