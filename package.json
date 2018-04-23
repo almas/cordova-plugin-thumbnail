@@ -1,0 +1,35 @@
+{
+    "name": "cordova-plugin-thumbnail",
+    "version": "0.1.0",
+    "description": "Image thumbnail generator for Cordova project",
+    "cordova": {
+        "id": "cordova-plugin-thumbnail",
+        "platforms": [
+            "ios",
+            "android"
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/almas/cordova-plugin-thumbnail.git"
+    },
+    "keywords": [
+        "thumbnail",
+        "ecosystem:cordova",
+        "cordova-android",
+        "cordova-ios"
+    ],
+    "author": "Almas",
+    "license": "Apache 2.0",
+    "bugs": {
+        "url": "https://github.com/almas/cordova-plugin-thumbnail/issues"
+    },
+    "homepage": "https://github.com/almas/cordova-plugin-thumbnail#readme",
+    "engines": {
+        "cordovaDependencies": {
+            "0.1.0": {
+                "cordova-plugin-file": "> 6.0.0"
+            }
+        }
+    }
+}
