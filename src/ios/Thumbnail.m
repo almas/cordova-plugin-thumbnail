@@ -71,12 +71,6 @@
 + (void) thumbnail:(NSString *)imageURL size:(CGFloat)maxSize toURL:(NSString *) toURL
 {
 
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    if ([fileManager fileExistsAtPath:toURL]) {
-        NSLog(@"Thumbnail file already exists %@", toURL);
-        return;
-    }
-
     NSURL* _imageURL = [NSURL URLWithString: imageURL];
 
     UIImage *uiImage = [self thumbnailWithContentsOfURL:_imageURL maxPixelSize:maxSize];
@@ -121,6 +115,12 @@
         //        sourceURL = [sourceURL stringByReplacingOccurrencesOfString:@"file://" withString:@""];
         NSString* targetURL = [self getTargetURL: command];
         CGFloat size = [self getMaxSize: command];
+
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        if ([fileManager fileExistsAtPath:targetURL]) {
+            NSLog(@"Thumbnail file already exists %@", targetURL);
+            return;
+        }
 
         [FileUtil createFileAtURL: targetURL];
         [Thumbnail thumbnail:sourceURL size: size toURL:targetURL];
