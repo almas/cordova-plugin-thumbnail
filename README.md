@@ -16,8 +16,7 @@ cordova plugin add https://github.com/almas/cordova-plugin-thumbnail.git
 
 - `srcPath`: Image path. Supported path format: `file:///path/to/spot`.
 - `options` other configuration parameter objects
-  - `width`: Width of thumbnail in pixels (default value: 120)
-  - `height` Height of thumbnail in pixels (default value: 120)
+  - `maxPixelSize`: Maximum width or height of thumbnail in pixels (default value: 120)
   - `targetPath` Thumbnail path. If not specified, will randomly create a file to store the generated thumbnail.
 - `successCallbackFn` Thumbnail generates a successful callback function
 - `failCallbackFn` Thumbnail Generation Failed Callback Function
@@ -26,13 +25,12 @@ cordova plugin add https://github.com/almas/cordova-plugin-thumbnail.git
 
 ```
 var options = {
-        width: 100,
-        height: 80,
-        targetPath: toPath
-    }
+        maxPixelSize: 100,
+        targetPath: 'file:///path/to/file'
+    };
 
-Thumbnails.thumbnail(sourcePath, options, function success(path) {
-    console.log ("thumbnails generated in:" + path);
+Thumbnails.thumbnail('file:///path/source/file', options, function success(path) {
+    console.log ("thumbnails generated at path:" + path);
 }, function fail(error) {
     console.error(error);
 });

@@ -57,18 +57,27 @@ public class ThumbnailsCordovaPlugin extends CordovaPlugin {
            @Override
            public void run() {
                try {
-                   try {
-                       new File(options.targetPath).createNewFile();
-                   } catch (IOException e) {
-                       throw new TargetPathNotFoundException();
-                   }
-                   Thumbnails.thumbnail(options);
-                   callbackContext.success(options.targetPath);
+                    File targetFile = new File(options.targetPath);
+                    try {
+                        if(!targetFile.exists()) {
+                            targetFile.getParentFile().mkdirs();
+                            targetFile.createNewFile();
+                        }
+                        Thumbnails.thumbnail(options);
+                        if (targetFile.setReadable(true, false)) {
+                            Log.i("ThumbnailsCordova", "setReadable for all.");
+                        } else {
+                            Log.e("ThumbnailsCordova", "Failed to setReadable for all.");
+                            throw new IOException(String.format("ThumbnailsCordova. Failed to setReadable for all on %s", targetFile));
+                        }
+                        callbackContext.success(options.targetPath);
+                    } catch (IOException e) {
+                        callbackContext.error("Can't create thumbnail file at path: " + options.targetPath + ". Error: " + e.getMessage());
+                    }
+
                } catch (SourcePathNotFoundException e) {
                    e.printStackTrace();
-                   callbackContext.error("The image file does not exist at path: " + options.sourcePath);
-               } catch (TargetPathNotFoundException e) {
-                   callbackContext.error("Can't create thumbnail file at path: " + options.targetPath);
+                   callbackContext.error("The image file does not exist at path: " + options.sourcePath + ". Error: " + e.getMessage());
                } catch (Exception e) {
                    callbackContext.error("Error: " + e.getMessage());
                }
@@ -79,17 +88,15 @@ public class ThumbnailsCordovaPlugin extends CordovaPlugin {
    }
 
     private Thumbnails.Options getThumbnailOptions(JSONArray args) throws JSONException {
-        boolean hasTargetPath = args.length() >= 4;
+        boolean hasTargetPath = args.length() >= 3;
         Thumbnails.Options options = new Thumbnails.Options();
-        options.sourcePath = args.getString(0);
+        options.sourcePath = args.getString(0).replace("file://", "");
         if (hasTargetPath) {
-            options.targetPath = args.getString(1);
-            options.width = args.getInt(2);
-            options.height = args.getInt(3);
+            options.targetPath = args.getString(1).replace("file://", "");
+            options.maxPixelSize = args.getInt(2);
         } else {
             options.targetPath = cacheRootPath + UUID.randomUUID().toString() + ".jpg";
-            options.width = args.getInt(1);
-            options.height = args.getInt(2);
+            options.maxPixelSize = args.getInt(1);
         }
 
         return options;

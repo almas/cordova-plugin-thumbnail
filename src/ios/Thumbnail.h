@@ -9,8 +9,7 @@
 
 @interface Thumbnail : NSObject
 
-+ (UIImage *) thumbnailToUIImage:(NSString *) imageURL size:(CGSize)size;
-+ (void) thumbnail:(NSString *)imageURL size:(CGSize)size toURL:(NSString *) toURL;
++ (void) thumbnail:(NSString *)imageURL size:(CGFloat)size toURL:(NSString *) toURL;
 
 @end
 

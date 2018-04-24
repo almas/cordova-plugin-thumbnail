@@ -20,37 +20,41 @@ public class Thumbnails {
 
     public static void thumbnail(Options thumbnailOptions) throws IOException {
         long begin = System.currentTimeMillis();
-        BitmapFactory.Options options = calculateImageSize(thumbnailOptions.sourcePath);
 
-        options.inJustDecodeBounds = false;
-        options.inSampleSize = calculateInSampleSize(options, thumbnailOptions.width, thumbnailOptions.height);
-        boolean needScaleImage = options.outWidth / options.inSampleSize > thumbnailOptions.width &&
-                options.outHeight / options.inSampleSize > thumbnailOptions.height;
+        Bitmap bitmap = thumbnailSamllImage(thumbnailOptions);
 
-        Bitmap bitmap = BitmapFactory.decodeFile(thumbnailOptions.sourcePath, options);
-
-        if (needScaleImage) {
-            bitmap = thumbnailSamllImage(bitmap, thumbnailOptions.width, thumbnailOptions.height);
+        if(saveBitmapToFile(bitmap, thumbnailOptions.targetPath)) {
+            File targetFile = new File(thumbnailOptions.targetPath);
+            if(targetFile.exists()) {
+                Log.i("Thumbnails.thumbnail", "Generated at [" + thumbnailOptions.targetPath + "] in " + (System.currentTimeMillis() - begin) + "ms");
+            } else {
+                Log.e("Thumbnails.thumbnail", "Generated file does not exists at [" + thumbnailOptions.targetPath + "]");
+            }
+        } else {
+            Log.e("Thumbnails.thumbnail", "Error generate file [" + thumbnailOptions.targetPath + "]");
         }
-
-        saveBitmapToFile(bitmap, thumbnailOptions.targetPath);
-
-        Log.i("thumbnail", "Generated at [" + thumbnailOptions.sourcePath + "] in " + (System.currentTimeMillis() - begin) + "ms");
     }
 
-    private static Bitmap thumbnailSamllImage(Bitmap bitmap, int width, int height) {
+    private static Bitmap thumbnailSamllImage(Options thumbnailOptions) {
+
+        BitmapFactory.Options options = calculateImageSize(thumbnailOptions.sourcePath);
+        options.inJustDecodeBounds = false;
+        Bitmap bitmap = BitmapFactory.decodeFile(thumbnailOptions.sourcePath, options);
+
         long begin = System.currentTimeMillis();
         int oWidth = bitmap.getWidth();
         int oHeight = bitmap.getHeight();
 
-        float ratio = Math.min(oWidth * 1.0f / width, oHeight * 1.0f / height);
+        float ratio = Math.min(oWidth * 1.0f / thumbnailOptions.maxPixelSize, oHeight * 1.0f / thumbnailOptions.maxPixelSize);
 
-        width = (int)(oWidth / ratio);
-        height = (int)(oHeight / ratio);
+        if(ratio > 1) {
+            int width = (int)(oWidth / ratio);
+            int height = (int)(oHeight / ratio);
 
-        bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height);
+            bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height);
+        }
 
-        Log.i("thumbnailSallImage", "Spent time: " + (System.currentTimeMillis() - begin) + "ms");
+        Log.i("Thumbnails.thumbnailSallImage", "Spent time: " + (System.currentTimeMillis() - begin) + "ms");
         return bitmap;
     }
 
@@ -64,38 +68,19 @@ public class Thumbnails {
             return options;
         } catch (FileNotFoundException e) {
             throw new SourcePathNotFoundException(e);
-        }finally {
+        } finally {
             if (is != null) {
                 is.close();
             }
         }
     }
 
-    public static int calculateInSampleSize(BitmapFactory.Options options,
-                                            int reqWidth, int reqHeight) {
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        options.inSampleSize = 8;
-
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            while ((halfHeight / inSampleSize) > reqHeight &&
-                    (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
-
-    public static void saveBitmapToFile(Bitmap bitmap, String targetPath) {
+    public static Boolean saveBitmapToFile(Bitmap bitmap, String targetPath) {
         OutputStream os = null;
 
         try {
+            // File targetFile = new File(targetPath);
+            // targetFile.createNewFile();
             os = new BufferedOutputStream(new FileOutputStream(targetPath));
             bitmap.compress(guessImageType(targetPath), 90, os);
         } catch (FileNotFoundException ex) {
@@ -107,12 +92,14 @@ public class Thumbnails {
             if (os != null) {
                 try {
                     os.close();
+                    return true;
                 } catch (IOException ex) {
                     Log.e("Thumbnails.saveBitmapToFile()", "Error closing file stream.");
                     ex.printStackTrace();
                 }
             }
         }
+        return false;
     }
 
     public static Bitmap.CompressFormat guessImageType(String filePath) {
@@ -129,8 +116,7 @@ public class Thumbnails {
     public static class Options {
         public String targetPath;
         public String sourcePath;
-        public int width;
-        public int height;
+        public int maxPixelSize;
 
         public Options() {
         }

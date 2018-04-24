@@ -68,63 +68,49 @@
 
 @implementation Thumbnail
 
-+ (void) thumbnail:(NSString *)imageURL size:(CGSize)size toURL:(NSString *) toURL
++ (void) thumbnail:(NSString *)imageURL size:(CGFloat)maxSize toURL:(NSString *) toURL
 {
-    CIContext *context = [CIContext contextWithOptions:nil];
+
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    if ([fileManager fileExistsAtPath:toURL]) {
+        NSLog(@"Thumbnail file already exists %@", toURL);
+        return;
+    }
+
     NSURL* _imageURL = [NSURL URLWithString: imageURL];
-    CIImage *image = [CIImage imageWithContentsOfURL:_imageURL];
-    CIImage *outputImage = [self thumbnailToCIImage:image size:size];
-    CGImageRef cgimg = [context createCGImage:outputImage fromRect:[outputImage extent]];
 
-    [self cgImageWriteToFile:cgimg urlStr: toURL];
-    CGImageRelease(cgimg);
+    UIImage *uiImage = [self thumbnailWithContentsOfURL:_imageURL maxPixelSize:maxSize];
+    if(uiImage) {
+        NSError *writeError = nil;
+        [UIImageJPEGRepresentation(uiImage, 1.0) writeToFile:toURL options:NSDataWritingAtomic error:&writeError];
+        if (writeError) {
+            NSLog(@"Failed to write image: %@", writeError);
+        }
+    }
 }
 
-+ (CIImage *) thumbnailToCIImage:(CIImage *)image size:(CGSize)size
++ (UIImage *)thumbnailWithContentsOfURL:(NSURL *)URL maxPixelSize:(CGFloat)maxPixelSize
 {
-
-    CIFilter *filter = [CIFilter filterWithName: @"CILanczosScaleTransform"];
-    struct CGSize originalSize = [image extent].size;
-    float scale = fminf((float) size.width / originalSize.width, (float) size.height / originalSize.height);
-
-    [filter setValue:image forKey:@"inputImage"];
-    [filter setValue: [NSNumber numberWithFloat: scale] forKey:@"inputScale"];
-    [filter setValue: @1.0f forKey:@"inputAspectRatio"];
-    CIImage *outputImage = [filter outputImage];
-    return outputImage;
-}
-
-+ (UIImage *) thumbnailToUIImage:(NSString *) imageURL size:(CGSize)size
-{
-    CIContext *context = [CIContext contextWithOptions:nil];
-    NSURL *_imageURL = [NSURL URLWithString: imageURL];
-    CIImage *image = [CIImage imageWithContentsOfURL: _imageURL];
-    CIImage *outputImage = [self thumbnailToCIImage:image size:size];
-    CGImageRef cgimg = [context createCGImage:outputImage fromRect:[outputImage extent]];
-    UIImage * thumbnail = [UIImage imageWithCGImage: cgimg];
-    CGImageRelease(cgimg);
-    return (thumbnail);
-}
-
-+ (BOOL) cgImageWriteToFile: (CGImageRef) image urlStr:(NSString *)urlStr
-{
-    CFURLRef url = (__bridge CFURLRef)[NSURL URLWithString:urlStr];
-    CGImageDestinationRef destination = CGImageDestinationCreateWithURL(url, kUTTypePNG, 1, NULL);
-    if (!destination) {
-        NSLog(@"Failed to create CGImageDestination for %@", urlStr);
-        return NO;
+    CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)URL, NULL);
+    if(imageSource == NULL) {
+        NSLog(@"Can not read from source: %@", URL);
+        return NULL;
     }
 
-    CGImageDestinationAddImage(destination, image, nil);
+    NSDictionary *imageOptions = @{
+                                   (NSString const *)kCGImageSourceCreateThumbnailFromImageIfAbsent : (NSNumber const *)kCFBooleanTrue,
+                                   (NSString const *)kCGImageSourceThumbnailMaxPixelSize            : @(maxPixelSize),
+                                   (NSString const *)kCGImageSourceCreateThumbnailWithTransform     : (NSNumber const *)kCFBooleanTrue
+                                   };
+    CGImageRef thumbnail = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, (__bridge CFDictionaryRef)imageOptions);
+    CFRelease(imageSource);
 
-    if (!CGImageDestinationFinalize(destination)) {
-        NSLog(@"Failed to write image to %@", urlStr);
-    }
+    UIImage *result = [[UIImage alloc] initWithCGImage:thumbnail];
+    CGImageRelease(thumbnail);
 
-    CFRelease(destination);
-
-    return YES;
+    return result;
 }
+
 @end
 
 @implementation ThumbnailCordovaPlugin
@@ -132,8 +118,9 @@
 - (void)thumbnail: (CDVInvokedUrlCommand*)command {
     [self.commandDelegate runInBackground:^{
         NSString* sourceURL = [command.arguments objectAtIndex:0];
+        //        sourceURL = [sourceURL stringByReplacingOccurrencesOfString:@"file://" withString:@""];
         NSString* targetURL = [self getTargetURL: command];
-        CGSize size = [self getSize: command];
+        CGFloat size = [self getMaxSize: command];
 
         [FileUtil createFileAtURL: targetURL];
         [Thumbnail thumbnail:sourceURL size: size toURL:targetURL];
@@ -151,17 +138,14 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (CGSize) getSize: (CDVInvokedUrlCommand *) command {
-    NSNumber* width = nil;
-    NSNumber* height = nil;
-    if ([command.arguments count] == 3) {
-        width = [command.arguments objectAtIndex:1];
-        height = [command.arguments objectAtIndex:2];
+- (CGFloat) getMaxSize: (CDVInvokedUrlCommand *) command {
+    NSNumber* maxPixelSize = nil;
+    if ([command.arguments count] == 2) {
+        maxPixelSize = [command.arguments objectAtIndex:1];
     } else {
-        width = [command.arguments objectAtIndex:2];
-        height = [command.arguments objectAtIndex:3];
+        maxPixelSize = [command.arguments objectAtIndex:2];
     }
-    return CGSizeMake([width floatValue], [height floatValue]);
+    return [maxPixelSize floatValue];
 }
 
 - (NSString *) getTargetURL: (CDVInvokedUrlCommand *) command {
@@ -169,7 +153,7 @@
     NSString* sourceURL = [command.arguments objectAtIndex:0];
     NSString* extname = [@"." stringByAppendingString:[sourceURL pathExtension]];
 
-    if ([command.arguments count] == 3) {
+    if ([command.arguments count] == 2) {
         NSString* uuid = [FileUtil uuid];
         NSString* filename = [uuid stringByAppendingString:extname];
         NSURL* _targetURL = [[FileUtil applicationDataDirectory] URLByAppendingPathComponent:filename];
@@ -178,6 +162,7 @@
         targetURL = [command.arguments objectAtIndex:1];
     }
 
+    targetURL = [targetURL stringByReplacingOccurrencesOfString:@"file://" withString:@""];
     return targetURL;
 }
 

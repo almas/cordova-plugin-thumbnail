@@ -4,16 +4,14 @@ var Thumbnails = {},
     emptyFn = function() {};
 
 function options2Args(options) {
-    if(!options.width) {
-        options.width = 120;
+    if(!options.maxPixelSize) {
+        options.maxPixelSize = 120;
     }
-    if(!options.height) {
-        options.height = 120;
-    }
+
     if (!options.targetPath) {
-        return [options.srcPath, options.width, options.height];
+        return [options.srcPath, options.maxPixelSize];
     } else {
-        return [options.srcPath, options.targetPath, options.width, options.height];
+        return [options.srcPath, options.targetPath, options.maxPixelSize];
     }
 }
 
