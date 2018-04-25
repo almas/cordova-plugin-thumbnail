@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.cordova.plugin.thumbnail" version="0.1.0">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-thumbnail" version="0.9.1">
     <name>Thumbnail</name>
     <description>Cordova Thumbnail Plugin</description>
     <license>Apache 2.0</license>
