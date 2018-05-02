@@ -35,7 +35,7 @@ public class Thumbnails {
         }
     }
 
-    private static Bitmap thumbnailSamllImage(Options thumbnailOptions) {
+    private static Bitmap thumbnailSamllImage(Options thumbnailOptions) throws IOException {
 
         BitmapFactory.Options options = calculateImageSize(thumbnailOptions.sourcePath);
         options.inJustDecodeBounds = false;
