@@ -21,7 +21,7 @@ public class Thumbnails {
     public static void thumbnail(Options thumbnailOptions) throws IOException {
         long begin = System.currentTimeMillis();
 
-        Bitmap bitmap = thumbnailSamllImage(thumbnailOptions);
+        Bitmap bitmap = thumbnailSmallImage(thumbnailOptions);
 
         if(saveBitmapToFile(bitmap, thumbnailOptions.targetPath)) {
             File targetFile = new File(thumbnailOptions.targetPath);
@@ -35,7 +35,7 @@ public class Thumbnails {
         }
     }
 
-    private static Bitmap thumbnailSamllImage(Options thumbnailOptions) throws IOException {
+    private static Bitmap thumbnailSmallImage(Options thumbnailOptions) throws IOException {
 
         BitmapFactory.Options options = calculateImageSize(thumbnailOptions.sourcePath);
         options.inJustDecodeBounds = false;

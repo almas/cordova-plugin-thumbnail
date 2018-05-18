@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class ThumbnailsCordovaPlugin extends CordovaPlugin {
+    private String LOG_TAG = "ThumbnailsCordovaPlugin";
     private Activity activity;
     private String persistentRoot;
     private String tempRoot;
@@ -58,16 +59,20 @@ public class ThumbnailsCordovaPlugin extends CordovaPlugin {
            public void run() {
                try {
                     File targetFile = new File(options.targetPath);
+                    File sourceFile = new File(options.sourcePath);
                     try {
-                        if(!targetFile.exists()) {
+                        if(!sourceFile.exists()){
+                            callbackContext.error("The image file does not exist at path: " + options.sourcePath );
+                            throw new IOException(String.format("The image file does not exist"));
+                        } else if(!targetFile.exists()) {
                             targetFile.getParentFile().mkdirs();
                             targetFile.createNewFile();
                         }
                         Thumbnails.thumbnail(options);
                         if (targetFile.setReadable(true, false)) {
-                            Log.i("ThumbnailsCordova", "setReadable for all.");
+                            Log.i(LOG_TAG, "setReadable for all.");
                         } else {
-                            Log.e("ThumbnailsCordova", "Failed to setReadable for all.");
+                            Log.e(LOG_TAG, "Failed to setReadable for all.");
                             throw new IOException(String.format("ThumbnailsCordova. Failed to setReadable for all on %s", targetFile));
                         }
                         callbackContext.success(options.targetPath);
@@ -75,9 +80,6 @@ public class ThumbnailsCordovaPlugin extends CordovaPlugin {
                         callbackContext.error("Can't create thumbnail file at path: " + options.targetPath + ". Error: " + e.getMessage());
                     }
 
-               } catch (SourcePathNotFoundException e) {
-                   e.printStackTrace();
-                   callbackContext.error("The image file does not exist at path: " + options.sourcePath + ". Error: " + e.getMessage());
                } catch (Exception e) {
                    callbackContext.error("Error: " + e.getMessage());
                }
