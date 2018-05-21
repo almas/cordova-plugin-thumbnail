@@ -23,7 +23,7 @@ public class Thumbnails {
 
         Bitmap bitmap = thumbnailSmallImage(thumbnailOptions);
 
-        if(saveBitmapToFile(bitmap, thumbnailOptions.targetPath)) {
+        if(saveBitmapToFile(bitmap, thumbnailOptions.targetPath, thumbnailOptions)) {
             File targetFile = new File(thumbnailOptions.targetPath);
             if(targetFile.exists()) {
                 Log.i("Thumbnails.thumbnail", "Generated at [" + thumbnailOptions.targetPath + "] in " + (System.currentTimeMillis() - begin) + "ms");
@@ -75,7 +75,7 @@ public class Thumbnails {
         }
     }
 
-    public static Boolean saveBitmapToFile(Bitmap bitmap, String targetPath) {
+    public static Boolean saveBitmapToFile(Bitmap bitmap, String targetPath, Options thumbnailOptions) {
         OutputStream os = null;
 
         try {
@@ -117,6 +117,7 @@ public class Thumbnails {
         public String targetPath;
         public String sourcePath;
         public int maxPixelSize;
+        public int compression;
 
         public Options() {
         }

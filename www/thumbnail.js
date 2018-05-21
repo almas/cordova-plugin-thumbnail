@@ -8,10 +8,14 @@ function options2Args(options) {
         options.maxPixelSize = 120;
     }
 
+    if(!options.compression) {
+        options.compression = 90;
+    }
+
     if (!options.targetPath) {
-        return [options.srcPath, options.maxPixelSize];
+        return [options.srcPath, options.maxPixelSize, options.compression];
     } else {
-        return [options.srcPath, options.targetPath, options.maxPixelSize];
+        return [options.srcPath, options.targetPath, options.maxPixelSize, options.compression];
     }
 }
 

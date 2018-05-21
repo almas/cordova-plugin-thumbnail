@@ -68,7 +68,7 @@
 
 @implementation Thumbnail
 
-+ (void) thumbnail:(NSString *)imageURL size:(CGFloat)maxSize toURL:(NSString *) toURL
++ (void) thumbnail:(NSString *)imageURL size:(CGFloat)maxSize toURL:(NSString *) toURL compression:(CGFloat) compressionQuality
 {
 
     NSURL* _imageURL = [NSURL URLWithString: imageURL];
@@ -76,7 +76,7 @@
     UIImage *uiImage = [self thumbnailWithContentsOfURL:_imageURL maxPixelSize:maxSize];
     if(uiImage) {
         NSError *writeError = nil;
-        [UIImageJPEGRepresentation(uiImage, 1.0) writeToFile:toURL options:NSDataWritingAtomic error:&writeError];
+        [UIImageJPEGRepresentation(uiImage, compressionQuality) writeToFile:toURL options:NSDataWritingAtomic error:&writeError];
         if (writeError) {
             NSLog(@"Failed to write image: %@", writeError);
         }
@@ -116,6 +116,14 @@
         NSString* targetURL = [self getTargetURL: command];
         CGFloat size = [self getMaxSize: command];
 
+        NSNumber* compressionPercent = nil;
+        if ([command.arguments count] == 2) {
+            compressionPercent = [command.arguments objectAtIndex:2];
+        } else {
+            compressionPercent = [command.arguments objectAtIndex:3];
+        }
+        CGFloat compressionQuality = [compressionPercent floatValue] / 100;
+
         NSFileManager *fileManager = [NSFileManager defaultManager];
         if ([fileManager fileExistsAtPath:targetURL]) {
             NSLog(@"Thumbnail file already exists %@", targetURL);
@@ -123,7 +131,7 @@
         }
 
         [FileUtil createFileAtURL: targetURL];
-        [Thumbnail thumbnail:sourceURL size: size toURL:targetURL];
+        [Thumbnail thumbnail:sourceURL size: size toURL:targetURL compression: compressionQuality];
 
         CDVPluginResult* pluginResult = nil;
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK

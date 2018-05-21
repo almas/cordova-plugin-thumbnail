@@ -96,9 +96,11 @@ public class ThumbnailsCordovaPlugin extends CordovaPlugin {
         if (hasTargetPath) {
             options.targetPath = args.getString(1).replace("file://", "");
             options.maxPixelSize = args.getInt(2);
+            options.compression = args.getInt(3);
         } else {
             options.targetPath = cacheRootPath + UUID.randomUUID().toString() + ".jpg";
             options.maxPixelSize = args.getInt(1);
+            options.compression = args.getInt(2);
         }
 
         return options;
