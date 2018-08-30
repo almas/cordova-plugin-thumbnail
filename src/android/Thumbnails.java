@@ -55,7 +55,8 @@ public class Thumbnails {
         }
 
         Log.i("Thumbnails.thumbnailSallImage", "Spent time: " + (System.currentTimeMillis() - begin) + "ms");
-        return bitmap;
+        Bitmap orientedBitmap = ExifUtil.rotateBitmap(thumbnailOptions.sourcePath, bitmap);
+        return orientedBitmap;
     }
 
     public static BitmapFactory.Options calculateImageSize(String sourcePath) throws IOException {

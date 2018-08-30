@@ -25,6 +25,7 @@
         <source-file src="src/android/TargetPathNotFoundException.java" target-dir="src/com/cordova/plugin/thumbnail"/>
         <source-file src="src/android/Thumbnails.java" target-dir="src/com/cordova/plugin/thumbnail"/>
         <source-file src="src/android/ThumbnailsCordovaPlugin.java" target-dir="src/com/cordova/plugin/thumbnail"/>
+        <source-file src="src/android/ExifUtil.java" target-dir="src/com/cordova/plugin/thumbnail"/>
     </platform>
 
     <platform name="ios">
