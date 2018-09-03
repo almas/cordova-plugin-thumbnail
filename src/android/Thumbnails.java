@@ -3,9 +3,10 @@ package com.cordova.plugin.thumbnail;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.util.Log;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -23,9 +24,9 @@ public class Thumbnails {
 
         Bitmap bitmap = thumbnailSmallImage(thumbnailOptions);
 
-        if(saveBitmapToFile(bitmap, thumbnailOptions.targetPath, thumbnailOptions)) {
+        if (saveBitmapToFile(bitmap, thumbnailOptions.targetPath, thumbnailOptions)) {
             File targetFile = new File(thumbnailOptions.targetPath);
-            if(targetFile.exists()) {
+            if (targetFile.exists()) {
                 Log.i("Thumbnails.thumbnail", "Generated at [" + thumbnailOptions.targetPath + "] in " + (System.currentTimeMillis() - begin) + "ms");
             } else {
                 Log.e("Thumbnails.thumbnail", "Generated file does not exists at [" + thumbnailOptions.targetPath + "]");
@@ -47,16 +48,57 @@ public class Thumbnails {
 
         float ratio = Math.min(oWidth * 1.0f / thumbnailOptions.maxPixelSize, oHeight * 1.0f / thumbnailOptions.maxPixelSize);
 
-        if(ratio > 1) {
-            int width = (int)(oWidth / ratio);
-            int height = (int)(oHeight / ratio);
+        if (ratio > 1) {
+            int width = (int) (oWidth / ratio);
+            int height = (int) (oHeight / ratio);
 
             bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height);
         }
-
+        ExifInterface exif = new ExifInterface(thumbnailOptions.sourcePath);
+        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+        if (orientation != 1) {
+            try {
+                Bitmap oriented = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), getRotationMatrix(orientation), true);
+                bitmap.recycle();
+                return oriented;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         Log.i("Thumbnails.thumbnailSallImage", "Spent time: " + (System.currentTimeMillis() - begin) + "ms");
-        Bitmap orientedBitmap = ExifUtil.rotateBitmap(thumbnailOptions.sourcePath, bitmap);
-        return orientedBitmap;
+        return bitmap;
+    }
+
+    private static Matrix getRotationMatrix(int orientation) {
+        Matrix matrix = new Matrix();
+        switch (orientation) {
+            case 2:
+                matrix.setScale(-1, 1);
+                break;
+            case 3:
+                matrix.setRotate(180);
+                break;
+            case 4:
+                matrix.setRotate(180);
+                matrix.postScale(-1, 1);
+                break;
+            case 5:
+                matrix.setRotate(90);
+                matrix.postScale(-1, 1);
+                break;
+            case 6:
+                matrix.setRotate(90);
+                break;
+            case 7:
+                matrix.setRotate(-90);
+                matrix.postScale(-1, 1);
+                break;
+            case 8:
+                matrix.setRotate(-90);
+                break;
+        }
+        return matrix;
+
     }
 
     public static BitmapFactory.Options calculateImageSize(String sourcePath) throws IOException {
