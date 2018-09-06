@@ -57,13 +57,7 @@ public class Thumbnails {
         ExifInterface exif = new ExifInterface(thumbnailOptions.sourcePath);
         int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
         if (orientation != 1) {
-            try {
-                Bitmap oriented = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), getRotationMatrix(orientation), true);
-                bitmap.recycle();
-                return oriented;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), getRotationMatrix(orientation), true);
         }
         Log.i("Thumbnails.thumbnailSallImage", "Spent time: " + (System.currentTimeMillis() - begin) + "ms");
         return bitmap;
