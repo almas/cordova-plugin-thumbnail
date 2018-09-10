@@ -34,6 +34,7 @@ public class Thumbnails {
         } else {
             Log.e("Thumbnails.thumbnail", "Error generate file [" + thumbnailOptions.targetPath + "]");
         }
+        bitmap = null;
     }
 
     private static Bitmap thumbnailSmallImage(Options thumbnailOptions) throws IOException {
