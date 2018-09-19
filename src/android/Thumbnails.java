@@ -123,9 +123,6 @@ public class Thumbnails {
             bitmap.compress(guessImageType(targetPath), 90, os);
         } catch (FileNotFoundException ex) {
             throw new TargetPathNotFoundException(ex);
-        } catch (IOException ex) {
-            Log.e("Thumbnails.saveBitmapToFile()", "Error opening file stream:" + targetPath);
-            ex.printStackTrace();
         } finally {
             if (os != null) {
                 try {
