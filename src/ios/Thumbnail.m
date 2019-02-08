@@ -94,7 +94,8 @@
     NSDictionary *imageOptions = @{
                                    (NSString const *)kCGImageSourceCreateThumbnailFromImageIfAbsent : (NSNumber const *)kCFBooleanTrue,
                                    (NSString const *)kCGImageSourceThumbnailMaxPixelSize            : @(maxPixelSize),
-                                   (NSString const *)kCGImageSourceCreateThumbnailWithTransform     : (NSNumber const *)kCFBooleanTrue
+                                   (NSString const *)kCGImageSourceCreateThumbnailWithTransform     : (NSNumber const *)kCFBooleanTrue,
+                                   (NSString const *)kCGImageSourceCreateThumbnailFromImageAlways   : (NSNumber const *)kCFBooleanTrue
                                    };
     CGImageRef thumbnail = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, (__bridge CFDictionaryRef)imageOptions);
     CFRelease(imageSource);
