@@ -1,9 +1,9 @@
 {
     "name": "@spoonconsulting/cordova-plugin-thumbnail",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Image thumbnail generator for Cordova project",
     "cordova": {
-        "id": "cordova-plugin-thumbnail",
+        "id": "@spoonconsulting/cordova-plugin-thumbnail",
         "platforms": [
             "ios",
             "android"
