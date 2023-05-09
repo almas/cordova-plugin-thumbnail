@@ -85,25 +85,50 @@
 
 + (UIImage *)thumbnailWithContentsOfURL:(NSURL *)URL maxPixelSize:(CGFloat)maxPixelSize
 {
+    NSData *data = [NSData dataWithContentsOfURL:URL];
+    UIImage* image = [[UIImage alloc]initWithData:data];
     CGImageSourceRef imageSource = CGImageSourceCreateWithURL((__bridge CFURLRef)URL, NULL);
+    CGFloat scale = [[UIScreen mainScreen] scale]; // Get the screen scale
+
     if(imageSource == NULL) {
         NSLog(@"Can not read from source: %@", URL);
         return NULL;
     }
+    
+    
+    CFDictionaryRef props = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, NULL);
+    NSDictionary *properties = (NSDictionary*)CFBridgingRelease(props);
 
-    NSDictionary *imageOptions = @{
-                                   (NSString const *)kCGImageSourceCreateThumbnailFromImageIfAbsent : (NSNumber const *)kCFBooleanTrue,
-                                   (NSString const *)kCGImageSourceThumbnailMaxPixelSize            : @(maxPixelSize),
-                                   (NSString const *)kCGImageSourceCreateThumbnailWithTransform     : (NSNumber const *)kCFBooleanTrue,
-                                   (NSString const *)kCGImageSourceCreateThumbnailFromImageAlways   : (NSNumber const *)kCFBooleanTrue
-                                   };
-    CGImageRef thumbnail = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, (__bridge CFDictionaryRef)imageOptions);
-    CFRelease(imageSource);
+    if (!properties) {
+        NSLog(@"No properties");
+    }
 
-    UIImage *result = [[UIImage alloc] initWithCGImage:thumbnail];
-    CGImageRelease(thumbnail);
+    double heightInPixel = [[properties objectForKey:@"PixelHeight"] doubleValue];
+    double widthInPixel = [[properties objectForKey:@"PixelWidth"]doubleValue];
+    NSNumber *orientation = [properties objectForKey:@"Orientation"];
+    
+    double heightInPoint = heightInPixel / (double)(image.scale);
+    double widthInPoint = widthInPixel / (double)(image.scale);
+    
+    double ratio = MIN(widthInPoint/maxPixelSize, heightInPoint/maxPixelSize);
+    
+    double thumbnailHeight = (heightInPoint/ratio) / scale;
+    double thumbnailWidth = (widthInPoint/ratio) / scale;
+    
+    CGSize newSize;
+    if ([orientation isEqualToNumber:@6]) {
+        newSize = CGSizeMake(thumbnailHeight, thumbnailWidth);
+    }
+    else {
+        newSize = CGSizeMake(thumbnailWidth, thumbnailHeight);
+    }
+    
+    UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
 
-    return result;
+    return newImage;
 }
 
 @end
